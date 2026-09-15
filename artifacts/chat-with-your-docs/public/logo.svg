@@ -1,0 +1,6 @@
+<svg width="184" height="52" viewBox="0 0 184 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="2" y="2" width="48" height="48" rx="14" fill="#C96D50"/>
+  <path d="M17 18.5C17 16.567 18.567 15 20.5 15H31.5C33.433 15 35 16.567 35 18.5V33.5C35 35.433 33.433 37 31.5 37H20.5C18.567 37 17 35.433 17 33.5V18.5Z" stroke="#FBFAF6" stroke-width="2.4"/>
+  <path d="M22 22.5H30M22 27H30M22 31.5H27" stroke="#FBFAF6" stroke-width="2.4" stroke-linecap="round"/>
+  <text x="63" y="34" fill="#183346" font-family="Georgia, serif" font-size="25" font-weight="bold">locus.</text>
+</svg>

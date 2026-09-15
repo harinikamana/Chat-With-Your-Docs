@@ -3,20 +3,24 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API for Chat With Your Docs
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: dashboard
+  - name: documents
+  - name: conversations
+  - name: chat
+  - name: search
+  - name: storage
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +28,419 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get the authenticated user's dashboard summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      summary: List the authenticated user's documents
+      responses:
+        "200":
+          description: Documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+    post:
+      operationId: createDocument
+      tags: [documents]
+      summary: Create document metadata after a storage upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInput"
+      responses:
+        "201":
+          description: Created document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+  /documents/{id}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      summary: Get one document
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "200":
+          description: Document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: renameDocument
+      tags: [documents]
+      summary: Rename a document
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentUpdate"
+      responses:
+        "200":
+          description: Renamed document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+    delete:
+      operationId: deleteDocument
+      tags: [documents]
+      summary: Delete a document and its derived data
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "204":
+          description: Deleted
+  /documents/{id}/process:
+    post:
+      operationId: processDocument
+      tags: [documents]
+      summary: Process an uploaded document
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "202":
+          description: Processing started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [conversations]
+      summary: List conversations
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+    post:
+      operationId: createConversation
+      tags: [conversations]
+      summary: Create a conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationInput"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationDetail"
+  /conversations/{id}:
+    get:
+      operationId: getConversation
+      tags: [conversations]
+      summary: Get a conversation with its messages
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      responses:
+        "200":
+          description: Conversation detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationDetail"
+    patch:
+      operationId: renameConversation
+      tags: [conversations]
+      summary: Rename a conversation
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConversationUpdate"
+      responses:
+        "200":
+          description: Renamed conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+    delete:
+      operationId: deleteConversation
+      tags: [conversations]
+      summary: Delete a conversation
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      responses:
+        "204":
+          description: Deleted
+  /chat:
+    post:
+      operationId: askChat
+      tags: [chat]
+      summary: Ask a grounded question about the user's documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatInput"
+      responses:
+        "200":
+          description: Grounded answer and source passages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+  /search:
+    post:
+      operationId: searchDocuments
+      tags: [search]
+      summary: Search document chunks semantically
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchInput"
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a private upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadRequest"
+      responses:
+        "200":
+          description: Signed upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
 components:
+  parameters:
+    DocumentId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ConversationId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
-
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    DashboardSummary:
+      type: object
+      required: [totalDocuments, readyDocuments, processingDocuments, totalConversations, recentDocuments, recentConversations]
+      properties:
+        totalDocuments: { type: integer }
+        readyDocuments: { type: integer }
+        processingDocuments: { type: integer }
+        totalConversations: { type: integer }
+        recentDocuments:
+          type: array
+          items: { $ref: "#/components/schemas/Document" }
+        recentConversations:
+          type: array
+          items: { $ref: "#/components/schemas/Conversation" }
+    Document:
+      type: object
+      required: [id, filename, originalFilename, fileType, fileSize, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        filename: { type: string }
+        originalFilename: { type: string }
+        fileType: { type: string }
+        fileSize: { type: integer }
+        storagePath: { type: ["string", "null"] }
+        status:
+          type: string
+          enum: [UPLOADING, UPLOADED, PROCESSING, EMBEDDING, READY, FAILED]
+        pageCount: { type: ["integer", "null"] }
+        errorMessage: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    DocumentDetail:
+      allOf:
+        - $ref: "#/components/schemas/Document"
+        - type: object
+          required: [chunkCount]
+          properties:
+            chunkCount: { type: integer }
+    DocumentInput:
+      type: object
+      required: [filename, originalFilename, fileType, fileSize, storagePath]
+      properties:
+        filename: { type: string, minLength: 1 }
+        originalFilename: { type: string, minLength: 1 }
+        fileType: { type: string, enum: [application/pdf, text/plain] }
+        fileSize: { type: integer, minimum: 1 }
+        storagePath: { type: string, minLength: 1 }
+    DocumentUpdate:
+      type: object
+      required: [filename]
+      properties:
+        filename: { type: string, minLength: 1, maxLength: 255 }
+    Conversation:
+      type: object
+      required: [id, title, documentId, messageCount, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        documentId: { type: ["string", "null"], format: uuid }
+        messageCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ConversationDetail:
+      allOf:
+        - $ref: "#/components/schemas/Conversation"
+        - type: object
+          required: [messages]
+          properties:
+            messages:
+              type: array
+              items: { $ref: "#/components/schemas/Message" }
+    ConversationInput:
+      type: object
+      properties:
+        title: { type: string, maxLength: 120 }
+        documentId: { type: ["string", "null"], format: uuid }
+    ConversationUpdate:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120 }
+    Message:
+      type: object
+      required: [id, role, content, sources, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        role:
+          type: string
+          enum: [user, assistant]
+        content: { type: string }
+        sources:
+          type: array
+          items: { $ref: "#/components/schemas/Source" }
+        createdAt: { type: string, format: date-time }
+    Source:
+      type: object
+      required: [chunkId, documentId, documentName, content, pageNumber, similarity]
+      properties:
+        chunkId: { type: string, format: uuid }
+        documentId: { type: string, format: uuid }
+        documentName: { type: string }
+        content: { type: string }
+        pageNumber: { type: ["integer", "null"] }
+        similarity: { type: number }
+    ChatInput:
+      type: object
+      required: [question]
+      properties:
+        question: { type: string, minLength: 1, maxLength: 4000 }
+        conversationId: { type: ["string", "null"], format: uuid }
+        documentId: { type: ["string", "null"], format: uuid }
+    ChatResponse:
+      type: object
+      required: [answer, sources, conversationId, messageId]
+      properties:
+        answer: { type: string }
+        sources:
+          type: array
+          items: { $ref: "#/components/schemas/Source" }
+        conversationId: { type: string, format: uuid }
+        messageId: { type: string, format: uuid }
+    SearchInput:
+      type: object
+      required: [query]
+      properties:
+        query: { type: string, minLength: 1, maxLength: 4000 }
+        documentId: { type: ["string", "null"], format: uuid }
+        topK: { type: integer, minimum: 1, maximum: 20, default: 5 }
+    SearchResult:
+      allOf:
+        - $ref: "#/components/schemas/Source"
+        - type: object
+          required: [metadata]
+          properties:
+            metadata:
+              type: object
+              additionalProperties: true
+    UploadRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name: { type: string, minLength: 1 }
+        size: { type: integer, minimum: 1 }
+        contentType: { type: string, enum: [application/pdf, text/plain] }
+    UploadResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL: { type: string, format: uri }
+        objectPath: { type: string }

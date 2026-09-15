@@ -5,7 +5,8 @@
  * API for Chat With Your Docs
  * OpenAPI spec version: 0.1.0
  */
+import type { Document } from './document';
 
-export interface HealthStatus {
-  status: string;
-}
+export type DocumentDetail = Document & {
+  chunkCount: number;
+};
