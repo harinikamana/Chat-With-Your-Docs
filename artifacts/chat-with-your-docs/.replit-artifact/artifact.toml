@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Chat With Your Docs"
+description = "An AI document workspace where authenticated users upload private PDFs and text files, ask questions grounded in their own documents, and inspect the source passages behind each answer."
+version = "1.0.0"
+id = "artifacts/chat-with-your-docs"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23383
+
+[services.development]
+run = "pnpm --filter @workspace/chat-with-your-docs run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/chat-with-your-docs", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/chat-with-your-docs/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23383"
+BASE_PATH = "/"
